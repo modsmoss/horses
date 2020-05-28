@@ -14,6 +14,10 @@ server.listen(process.env.NODE_PORT, () =>
 );
 
 const sockets = [];
+const state = {
+  running: false,
+  raceCount: 0,
+};
 
 const poll = async () => {
   const response = await axios(config.axiosConfig);
@@ -23,6 +27,13 @@ const poll = async () => {
     console.log("No content");
     await poll();
   } else if (status === 200) {
+    if (!state.running && data.event === "start") {
+      state.raceCount++;
+      state.running = true;
+    } else if (data.event === "finish") {
+      state.running = false;
+    }
+
     push(data);
 
     await poll();
@@ -33,12 +44,16 @@ poll();
 
 const push = data => {
   sockets.forEach(socket => {
-    socket.emit("update", data);
+    socket.emit("update", { ...data, raceCount: state.raceCount });
   });
   console.log(data);
 };
 
 io.on("connection", socket => {
-  console.log("connection");
   sockets.push(socket);
+  console.log("connection", socket.id);
+  io.on("disconnect", () => {
+    sockets.splice(sockets.indexOf(socket, 1));
+    console.log("diconnected", socket.id);
+  });
 });
