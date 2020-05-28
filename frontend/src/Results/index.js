@@ -16,9 +16,7 @@ const Results = () => {
   useEffect(() => {
     const socket = socketIo(process.env.REACT_APP_API_URI);
     socket.on("update", data => {
-      console.log("Data", data);
       if (data.raceCount > raceCount) {
-        console.log("about to flush");
         setRaceCount(data.raceCount);
         dispatch({ type: "flush" });
       }
@@ -28,8 +26,6 @@ const Results = () => {
       socket.close();
     };
   }, [raceCount]);
-
-  console.log(results);
 
   return results.horses && results.horses.length ? (
     <ResultsTable horses={results.horses} raceCount={raceCount}></ResultsTable>
