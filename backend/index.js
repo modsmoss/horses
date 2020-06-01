@@ -25,7 +25,7 @@ const poll = async () => {
 
   if (status === 204) {
     console.log("No content");
-    await poll();
+    poll();
   } else if (status === 200) {
     if (!state.running && data.event === "start") {
       state.raceCount++;
@@ -36,7 +36,7 @@ const poll = async () => {
 
     push(data);
 
-    await poll();
+    poll();
   }
 };
 
